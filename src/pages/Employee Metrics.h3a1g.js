@@ -1,4 +1,5 @@
 import wixData from 'wix-data';
+import { showToast } from 'wix-dashboard';
 
 $w.onReady(function () {
     // Add event handler for when the user selects a date on the calendar
@@ -11,7 +12,7 @@ $w.onReady(function () {
     });
 });
 
-function filterDataset(selectedDate) {
+function filterDataset(selectedDate) {  
     const selectedDateObj = new Date(selectedDate);
     const selectedMonth = selectedDateObj.getMonth() + 1; // Month is zero-based, so we add 1
     const selectedDay = selectedDateObj.getDate();
@@ -34,3 +35,28 @@ function filterDataset(selectedDate) {
             console.error('Error filtering dataset:', error);
         });
 }
+
+$w.onReady(function () {
+    // Make #group9 invisible on startup
+    $w('#group9').hide();
+});
+
+$w("#button1").onClick( (event) => {
+    console.log('Form data saved successfully!');
+
+    try {
+        // Show #group9 temporarily
+        $w('#group9').show();
+        setTimeout(() => $w('#group9').hide(), 2000);
+
+        // Clear input boxes
+        $w("input").forEach(input => {
+            input.value = "";
+        });
+
+    } catch (error) {
+        console.error('Error saving form data:', error);
+    }
+} );
+
+
