@@ -1,62 +1,45 @@
 import wixData from 'wix-data';
-import { showToast } from 'wix-dashboard';
 
 $w.onReady(function () {
-    // Add event handler for when the user selects a date on the calendar
-    $w('#datePicker3').onChange((event) => {
-        const selectedDate = event.target.value;
-        console.log("Selected date from calendar:", selectedDate); // Log the selected date from the calendar
+    // Set up the repeater items
+    $w("#EmployeeRepeater").onItemReady(($item, itemData, index) => {
+        let id; // Declare id here
 
-        // Filter the dataset based on the selected date
-        filterDataset(selectedDate);
+        // Add a delay before getting the text from the "#name" element
+        setTimeout(() => {
+            // Get the employee ID from the "statusText" element
+            id = $item("#statusText").text; // Assign the value to id here
+
+            // Output the value of employeeId to the console
+            console.log("Value of employeeId:", id);
+        }, 1000); // Delay of 1 second
+
+        // Add event handler for the submit button
+        $item("#button1").onClick(async () => {
+            // Get the input values
+            const expectedLogin = $item("#timePicker3").value;
+            const expectedLogout = $item("#timePicker4").value;
+            const expectedTasksCompleted = $item("#input1").value;
+            const expectedHoursWorked = $item("#input2").value;
+            const comments = $item("#textBox1").value;
+
+            // Construct the data to be submitted
+            const dataToSubmit = {
+                employeeId: id, // Now id is accessible here
+                expectedLogin: expectedLogin,
+                expectedLogout: expectedLogout,
+                expectedTasksCompleted: expectedTasksCompleted,
+                expectedHoursWorked: expectedHoursWorked,
+                comments: comments
+            };
+
+            try {
+                // Submit the data
+                await wixData.insert('Expected', dataToSubmit);
+                console.log('Form data saved successfully!');
+            } catch (error) {
+                console.error('Error saving form data:', error);
+            }
+        });
     });
 });
-
-function filterDataset(selectedDate) {  
-    const selectedDateObj = new Date(selectedDate);
-    const selectedMonth = selectedDateObj.getMonth() + 1; // Month is zero-based, so we add 1
-    const selectedDay = selectedDateObj.getDate();
-    const selectedYear = selectedDateObj.getFullYear();
-
-    // Construct the formatted date string using the extracted parts
-    const formattedDate = `${selectedMonth}/${selectedDay}/${selectedYear.toString().slice(-2)}`; // Format the year to match the dataset
-
-    console.log("Filtering dataset with date:", formattedDate); // Log the date being used for filtering
-
-    wixData.query('EmployeeDatabase')
-        .eq('date', formattedDate) // Filter items with dates equal to the selected date
-        .find()
-        .then((results) => {
-            console.log("Filtered results:", results); // Log the filtered results
-
-            $w('#propertiesRepeater').data = results.items;
-        })
-        .catch((error) => {
-            console.error('Error filtering dataset:', error);
-        });
-}
-
-$w.onReady(function () {
-    // Make #group9 invisible on startup
-    $w('#group9').hide();
-});
-
-$w("#button1").onClick( (event) => {
-    console.log('Form data saved successfully!');
-
-    try {
-        // Show #group9 temporarily
-        $w('#group9').show();
-        setTimeout(() => $w('#group9').hide(), 2000);
-
-        // Clear input boxes
-        $w("input").forEach(input => {
-            input.value = "";
-        });
-
-    } catch (error) {
-        console.error('Error saving form data:', error);
-    }
-} );
-
-
