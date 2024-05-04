@@ -36,3 +36,31 @@ $w("#dropdown1").onChange( (event) => {
         $w("#progressBar2").hide();
     }
 });
+
+import wixData from 'wix-data';
+
+async function storeDivisionResult() {
+    try {
+        // Query the first table
+        let results1 = await wixData.query('FirstTable').find();
+        let number1 = results1.items[0].numberField; // Replace 'numberField' with your actual field name
+
+        // Query the second table
+        let results2 = await wixData.query('SecondTable').find();
+        let number2 = results2.items[0].numberField; // Replace 'numberField' with your actual field name
+
+        // Divide the numbers
+        let divisionResult = number1 / number2;
+
+        // Store the result in a dataset
+        let result = await wixData.insert('ResultDataset', { result: divisionResult }); // Replace 'ResultDataset' with your actual dataset name and 'result' with your actual field name
+
+        console.log('Division result stored successfully:', result);
+    } catch (error) {
+        console.error('Error storing division result:', error);
+    }
+}
+
+$w.onReady(function () {
+    storeDivisionResult();
+});
