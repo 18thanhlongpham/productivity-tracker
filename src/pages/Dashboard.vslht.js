@@ -1,6 +1,6 @@
 import wixData from 'wix-data';
 
-$w.onReady(async function () {
+$w.onReady(function () {
     // Add a delay before collapsing the tables and hiding the progress bars
     setTimeout(() => {
         $w("#table5").collapse();
@@ -17,12 +17,9 @@ $w.onReady(async function () {
         opts.shift(); 
         $w("#dropdown1").options = opts; 
     }, 2000); // Delay of 2 seconds
-
-    // Call the storeDivisionResult function
-    await storeDivisionResult();
 });
 
-$w("#dropdown1").onChange( (event) => {
+$w("#dropdown1").onChange(async (event) => {
     let selectedName = $w("#dropdown1").value; // Get the selected name
 
     if (selectedName) {
@@ -32,6 +29,9 @@ $w("#dropdown1").onChange( (event) => {
         $w("#table3").expand();
         $w("#progressBar1").show();
         $w("#progressBar2").show();
+
+        // Call the storeDivisionResult function
+        await storeDivisionResult();
     } else {
         // If no name is selected (i.e., the dropdown is cleared), collapse the tables and hide the progress bars
         $w("#table5").collapse();
