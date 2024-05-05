@@ -22,6 +22,7 @@ $w.onReady(function () {
             const expectedTasksCompleted = $item("#input1").value;
             const expectedHoursWorked = $item("#input2").value;
             const comments = $item("#textBox1").value;
+            const date = $item("#datePicker2").value;
 
             // Construct the data to be submitted
             const dataToSubmit = {
@@ -30,7 +31,8 @@ $w.onReady(function () {
                 expectedLogout: expectedLogout,
                 expectedTasksCompleted: expectedTasksCompleted,
                 expectedHoursWorked: expectedHoursWorked,
-                comments: comments
+                comments: comments,
+                dateA1: date
             };
 
             try {

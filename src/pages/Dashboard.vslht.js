@@ -30,8 +30,8 @@ $w("#dropdown1").onChange(async (event) => {
         $w("#progressBar1").show();
         $w("#progressBar2").show();
 
-        // Call the storeDivisionResult function
-        await storeDivisionResult();
+        // Call the storeDivisionResult function with the selected name
+        await storeDivisionResult(selectedName);
     } else {
         // If no name is selected (i.e., the dropdown is cleared), collapse the tables and hide the progress bars
         $w("#table5").collapse();
@@ -42,15 +42,17 @@ $w("#dropdown1").onChange(async (event) => {
     }
 });
 
-async function storeDivisionResult() {
+async function storeDivisionResult(selectedName) {
     try {
         // Query the first table
         let results1 = await wixData.query('EmployeeDatabase')
+            .eq('employeeId', selectedName)
             .find();
         let number1 = results1.items[0]['hoursWorked']; 
 
         // Query the second table
         let results2 = await wixData.query('Expected')
+            .eq('employeeId', selectedName)
             .find();
         let number2 = results2.items[0]['expectedHoursWorked']; 
 
@@ -61,6 +63,8 @@ async function storeDivisionResult() {
         let result = await wixData.insert('Calculate', { calc: divisionResult }); 
 
         console.log('Division result stored successfully:', result);
+        console.log('num1:', number1);
+        console.log('num2', number2);
     } catch (error) {
         console.error('Error storing division result:', error);
     }
