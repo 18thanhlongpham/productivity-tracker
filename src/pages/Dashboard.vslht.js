@@ -30,8 +30,20 @@ $w("#dropdown1").onChange(async (event) => {
         $w("#progressBar1").show();
         $w("#progressBar2").show();
 
-        // Call the storeDivisionResult function with the selected name
-        await storeDivisionResult(selectedName);
+        // Query the EmployeeDatabase to get the employeeId for the selected name
+        let employeeData = await wixData.query('EmployeeDatabase')
+            .eq('name', selectedName) // Replace 'name' with your actual field name for the employee name
+            .find();
+
+        if (!employeeData.items.length) {
+            console.error('No matching records found in EmployeeDatabase for name:', selectedName);
+            return;
+        }
+
+        let employeeId = employeeData.items[0]['employeeId'];
+
+        // Call the storeDivisionResult function with the employeeId
+        await storeDivisionResult(employeeId);
     } else {
         // If no name is selected (i.e., the dropdown is cleared), collapse the tables and hide the progress bars
         $w("#table5").collapse();
@@ -42,27 +54,35 @@ $w("#dropdown1").onChange(async (event) => {
     }
 });
 
-async function storeDivisionResult(selectedName) {
+async function storeDivisionResult(employeeId) {
     try {
         // Query the first table
         let results1 = await wixData.query('EmployeeDatabase')
-            .eq('employeeId', selectedName)
+            .eq('employeeId', employeeId)
             .find();
+        if (!results1.items.length) {
+            console.error('No matching records found in EmployeeDatabase for employeeId:', employeeId);
+            return;
+        }
         let number1 = results1.items[0]['hoursWorked']; 
 
         // Query the second table
         let results2 = await wixData.query('Expected')
-            .eq('employeeId', selectedName)
+            .eq('employeeId', employeeId)
             .find();
+        if (!results2.items.length) {
+            console.error('No matching records found in Expected for employeeId:', employeeId);
+            return;
+        }
         let number2 = results2.items[0]['expectedHoursWorked']; 
 
         // Divide the numbers
         let divisionResult = number1 / number2;
 
-        // Store the result in a dataset
-        let result = await wixData.insert('Calculate', { calc: divisionResult }); 
+        // Store the result and the employeeId in a dataset
+        let result = await wixData.insert('Calculate', { calc: divisionResult, employeeId: employeeId }); 
 
-        console.log('Division result stored successfully:', result);
+        console.log('Division result and employeeId stored successfully:', result);
         console.log('num1:', number1);
         console.log('num2', number2);
     } catch (error) {
