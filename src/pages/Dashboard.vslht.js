@@ -4,10 +4,13 @@ $w.onReady(function () {
     // Add a delay before collapsing the tables and hiding the progress bars
     setTimeout(() => {
         $w("#table5").collapse();
-        $w("#table6").collapse();
         $w("#table3").collapse();
         $w("#progressBar1").hide();
         $w("#progressBar2").hide();
+        $w("#dummy1").collapse();
+        $w("#dummy2").collapse();
+        $w("#dummy3").collapse();
+        $w("#dummy4").collapse();
     }, 2000); // Delay of 2 seconds
 
     // Add a delay before removing "All" from the dropdown
@@ -25,7 +28,6 @@ $w("#dropdown1").onChange(async (event) => {
     if (selectedName) {
         // Expand the tables and show the progress bars
         $w("#table5").expand();
-        $w("#table6").expand();
         $w("#table3").expand();
         $w("#progressBar1").show();
         $w("#progressBar2").show();
@@ -43,17 +45,42 @@ $w("#dropdown1").onChange(async (event) => {
         let employeeId = employeeData.items[0]['employeeId'];
 
         // Call the storeDivisionResult function with the employeeId
-        await storeDivisionResult(employeeId);
+        //await storeDivisionResult(employeeId);
+
+        // Collapse all dummy tables
+        $w("#dummy1").collapse();
+        $w("#dummy2").collapse();
+        $w("#dummy3").collapse();
+        $w("#dummy4").collapse();
+
+        // Expand the corresponding dummy table based on the selected employeeId
+        switch (employeeId) {
+            case 'A0001':
+                $w("#dummy1").expand();
+                break;
+            case 'A0002':
+                $w("#dummy2").expand();
+                break;
+            case 'A0003':
+                $w("#dummy3").expand();
+                break;
+            case 'A0004':
+                $w("#dummy4").expand();
+                break;
+        }
     } else {
         // If no name is selected (i.e., the dropdown is cleared), collapse the tables and hide the progress bars
         $w("#table5").collapse();
-        $w("#table6").collapse();
         $w("#table3").collapse();
         $w("#progressBar1").hide();
         $w("#progressBar2").hide();
+        $w("#dummy1").collapse();
+        $w("#dummy2").collapse();
+        $w("#dummy3").collapse();
+        $w("#dummy4").collapse();
     }
-});
-
+}); 
+/*
 async function storeDivisionResult(employeeId) {
     try {
         // Query the first table
@@ -89,3 +116,4 @@ async function storeDivisionResult(employeeId) {
         console.error('Error storing division result:', error);
     }
 }
+*/
