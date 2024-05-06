@@ -36,9 +36,9 @@ $w.onReady(async function () {
 
         // Insert the data into the datasets
         await wixData.insert('EmployeeData', data);
-        await wixData.insert('Dummy2', data);
-        await wixData.insert('Dummy3', data);
-        await wixData.insert('Dummy4', data);
+        //await wixData.insert('Dummy2', data);
+        //await wixData.insert('Dummy3', data);
+        //await wixData.insert('Dummy4', data);
 
         // Move to the next day
         date.setDate(date.getDate() + 1);
