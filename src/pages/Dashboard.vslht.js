@@ -8,9 +8,6 @@ $w.onReady(function () {
         $w("#progressBar1").hide();
         $w("#progressBar2").hide();
         $w("#dummy1").collapse();
-        $w("#dummy2").collapse();
-        $w("#dummy3").collapse();
-        $w("#dummy4").collapse();
     }, 2000); // Delay of 2 seconds
 
     // Add a delay before removing "All" from the dropdown
@@ -23,12 +20,18 @@ $w.onReady(function () {
 });
 
 $w("#dropdown1").onChange(async (event) => {
+    console.log('onChange event triggered for #dropdown1');
+
+    // Expand #dummy1 as soon as any option is selected
+    $w("#dummy1").expand();
+
     let selectedName = $w("#dropdown1").value; // Get the selected name
 
     if (selectedName) {
         // Expand the tables and show the progress bars
         $w("#table5").expand();
         $w("#table3").expand();
+
         $w("#progressBar1").show();
         $w("#progressBar2").show();
 
@@ -45,29 +48,9 @@ $w("#dropdown1").onChange(async (event) => {
         let employeeId = employeeData.items[0]['employeeId'];
 
         // Call the storeDivisionResult function with the employeeId
-        //await storeDivisionResult(employeeId);
+        await storeDivisionResult(employeeId);
 
-        // Collapse all dummy tables
-        $w("#dummy1").collapse();
-        $w("#dummy2").collapse();
-        $w("#dummy3").collapse();
-        $w("#dummy4").collapse();
-
-        // Expand the corresponding dummy table based on the selected employeeId
-        switch (employeeId) {
-            case 'A0001':
-                $w("#dummy1").expand();
-                break;
-            case 'A0002':
-                $w("#dummy2").expand();
-                break;
-            case 'A0003':
-                $w("#dummy3").expand();
-                break;
-            case 'A0004':
-                $w("#dummy4").expand();
-                break;
-        }
+        // Do not collapse #dummy1 when an option is selected
     } else {
         // If no name is selected (i.e., the dropdown is cleared), collapse the tables and hide the progress bars
         $w("#table5").collapse();
@@ -75,45 +58,64 @@ $w("#dropdown1").onChange(async (event) => {
         $w("#progressBar1").hide();
         $w("#progressBar2").hide();
         $w("#dummy1").collapse();
-        $w("#dummy2").collapse();
-        $w("#dummy3").collapse();
-        $w("#dummy4").collapse();
     }
-}); 
-/*
-async function storeDivisionResult(employeeId) {
-    try {
-        // Query the first table
-        let results1 = await wixData.query('EmployeeDatabase')
-            .eq('employeeId', employeeId)
-            .find();
-        if (!results1.items.length) {
-            console.error('No matching records found in EmployeeDatabase for employeeId:', employeeId);
-            return;
-        }
-        let number1 = results1.items[0]['hoursWorked']; 
+});
 
-        // Query the second table
-        let results2 = await wixData.query('Expected')
+async function storeDivisionResult(employeeId) {
+    console.log('storeDivisionResult called with employeeId:', employeeId);
+
+    try {
+        // Query the Expected table
+        let expectedResults = await wixData.query('Expected')
             .eq('employeeId', employeeId)
             .find();
-        if (!results2.items.length) {
+        console.log('Expected results:', expectedResults);
+
+        if (!expectedResults.items.length) {
             console.error('No matching records found in Expected for employeeId:', employeeId);
             return;
         }
-        let number2 = results2.items[0]['expectedHoursWorked']; 
+
+        // Get the expectedHoursWorked and the dates for the selected employeeId
+        let expectedHoursWorked = 0;
+        let dates = [];
+        for (let item of expectedResults.items) {
+            expectedHoursWorked += item['expectedHoursWorked'];
+            dates.push(item['dateA1']); // Replace 'date' with your actual field name for the date
+        }
+
+        // Query the EmployeeDatabase table
+        let employeeResults = await wixData.query('EmployeeData')
+            .eq('employeeId', employeeId)
+            .hasSome('date', dates) // Replace 'date' with your actual field name for the date
+            .find();
+        console.log('EmployeeDatabase results:', employeeResults);
+
+        if (!employeeResults.items.length) {
+            console.error('No matching records found in EmployeeDatabase for employeeId and dates:', employeeId, dates);
+            return;
+        }
+
+        // Get the hoursWorked for the selected employeeId and the dates
+        let hoursWorked = 0;
+        for (let item of employeeResults.items) {
+            hoursWorked += item['hoursWorked'];
+        }
 
         // Divide the numbers
-        let divisionResult = number1 / number2;
+        let divisionResult = hoursWorked / expectedHoursWorked;
 
-        // Store the result and the employeeId in a dataset
-        let result = await wixData.insert('Calculate', { calc: divisionResult, employeeId: employeeId }); 
+        // Store the result, the employeeId, and the target in a dataset
+        let result = await wixData.insert('Calculate', { calc: divisionResult, employeeId: employeeId, target: 1 }); 
 
-        console.log('Division result and employeeId stored successfully:', result);
-        console.log('num1:', number1);
-        console.log('num2', number2);
+        console.log('Division result, employeeId, and target stored successfully:', result);
+        console.log('num1:', hoursWorked);
+        console.log('num2', expectedHoursWorked);
+
+        // Update the progress bar
+        $w("#progressBar1").value = divisionResult; // Actual progress
+        $w("#progressBar1").targetValue = 1; // Target
     } catch (error) {
         console.error('Error storing division result:', error);
     }
 }
-*/
