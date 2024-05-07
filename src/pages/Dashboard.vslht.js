@@ -75,14 +75,18 @@ async function storeDivisionResult(employeeId) {
             console.error('No matching records found in Expected for employeeId:', employeeId);
             $w("#progressBar1").value = 0;
             $w("#progressBar1").targetValue = 1;
+            $w("#progressBar2").value = 0;
+            $w("#progressBar2").targetValue = 1;
             return;
         }
 
-        // Get the expectedHoursWorked and the dates for the selected employeeId
+        // Get the expectedHoursWorked, expectedTasksCompleted and the dates for the selected employeeId
         let expectedHoursWorked = 0;
+        let expectedTasksCompleted = 0;
         let dates = [];
         for (let item of expectedResults.items) {
             expectedHoursWorked += item['expectedHoursWorked'];
+            expectedTasksCompleted += item['expectedTasksCompleted'];
             dates.push(item['dateA1']); // Replace 'date' with your actual field name for the date
         }
 
@@ -97,34 +101,57 @@ async function storeDivisionResult(employeeId) {
             console.error('No matching records found in EmployeeDatabase for employeeId and dates:', employeeId, dates);
             $w("#progressBar1").value = 0;
             $w("#progressBar1").targetValue = 1;
+            $w("#progressBar2").value = 0;
+            $w("#progressBar2").targetValue = 1;
             return;
         }
 
-        // Get the hoursWorked for the selected employeeId and the dates
+        // Get the hoursWorked and tasksCompleted for the selected employeeId and the dates
         let hoursWorked = 0;
+        let tasksCompleted = 0;
         for (let item of employeeResults.items) {
             hoursWorked += item['hoursWorked'];
+            tasksCompleted += item['tasksCompleted'];
         }
 
         // Divide the numbers
-        let divisionResult = hoursWorked / expectedHoursWorked;
+        let divisionResultHours = hoursWorked / expectedHoursWorked;
+        let divisionResultTasks = tasksCompleted / expectedTasksCompleted;
 
         // Check if the divisionResult is a number
-        if (isNaN(divisionResult)) {
+        if (isNaN(divisionResultHours)) {
             // If it's not a number, set the progress bar's value to 0 and its target to 1
             $w("#progressBar1").value = 0;
             $w("#progressBar1").targetValue = 1;
         } else {
             // If it's a number, store the result, the employeeId, and the target in a dataset
-            let result = await wixData.insert('Calculate', { calc: divisionResult, employeeId: employeeId, target: 1 }); 
+            let result = await wixData.insert('Calculate', { calc: divisionResultHours, employeeId: employeeId, target: 1 }); 
 
-            console.log('Division result, employeeId, and target stored successfully:', result);
+            console.log('Division result for hours, employeeId, and target stored successfully:', result);
             console.log('num1:', hoursWorked);
             console.log('num2', expectedHoursWorked);
 
             // Update the progress bar
-            $w("#progressBar1").value = divisionResult; // Actual progress
+            $w("#progressBar1").value = divisionResultHours; // Actual progress
             $w("#progressBar1").targetValue = 1; // Target
+        }
+
+        // Check if the divisionResultTasks is a number
+        if (isNaN(divisionResultTasks)) {
+            // If it's not a number, set the progress bar's value to 0 and its target to 1
+            $w("#progressBar2").value = 0;
+            $w("#progressBar2").targetValue = 1;
+        } else {
+            // If it's a number, store the result, the employeeId, and the target in a dataset
+            let result = await wixData.insert('Calculate', { calc: divisionResultTasks, employeeId: employeeId, target: 1 }); 
+
+            console.log('Division result for tasks, employeeId, and target stored successfully:', result);
+            console.log('num1:', tasksCompleted);
+            console.log('num2', expectedTasksCompleted);
+
+            // Update the progress bar
+            $w("#progressBar2").value = divisionResultTasks; // Actual progress
+            $w("#progressBar2").targetValue = 1; // Target
         }
     } catch (error) {
         console.error('Error storing division result:', error);
