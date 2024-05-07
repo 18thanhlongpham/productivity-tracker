@@ -73,6 +73,8 @@ async function storeDivisionResult(employeeId) {
 
         if (!expectedResults.items.length) {
             console.error('No matching records found in Expected for employeeId:', employeeId);
+            $w("#progressBar1").value = 0;
+            $w("#progressBar1").targetValue = 1;
             return;
         }
 
@@ -93,6 +95,8 @@ async function storeDivisionResult(employeeId) {
 
         if (!employeeResults.items.length) {
             console.error('No matching records found in EmployeeDatabase for employeeId and dates:', employeeId, dates);
+            $w("#progressBar1").value = 0;
+            $w("#progressBar1").targetValue = 1;
             return;
         }
 
@@ -105,16 +109,23 @@ async function storeDivisionResult(employeeId) {
         // Divide the numbers
         let divisionResult = hoursWorked / expectedHoursWorked;
 
-        // Store the result, the employeeId, and the target in a dataset
-        let result = await wixData.insert('Calculate', { calc: divisionResult, employeeId: employeeId, target: 1 }); 
+        // Check if the divisionResult is a number
+        if (isNaN(divisionResult)) {
+            // If it's not a number, set the progress bar's value to 0 and its target to 1
+            $w("#progressBar1").value = 0;
+            $w("#progressBar1").targetValue = 1;
+        } else {
+            // If it's a number, store the result, the employeeId, and the target in a dataset
+            let result = await wixData.insert('Calculate', { calc: divisionResult, employeeId: employeeId, target: 1 }); 
 
-        console.log('Division result, employeeId, and target stored successfully:', result);
-        console.log('num1:', hoursWorked);
-        console.log('num2', expectedHoursWorked);
+            console.log('Division result, employeeId, and target stored successfully:', result);
+            console.log('num1:', hoursWorked);
+            console.log('num2', expectedHoursWorked);
 
-        // Update the progress bar
-        $w("#progressBar1").value = divisionResult; // Actual progress
-        $w("#progressBar1").targetValue = 1; // Target
+            // Update the progress bar
+            $w("#progressBar1").value = divisionResult; // Actual progress
+            $w("#progressBar1").targetValue = 1; // Target
+        }
     } catch (error) {
         console.error('Error storing division result:', error);
     }
