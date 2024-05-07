@@ -17,7 +17,7 @@ $w.onReady(function () {
             const expectedHoursWorked = Number($item("#input2").value);
             const comments = $item("#textBox1").value;
             const dateA1 = new Date($item("#datePicker2").value);
-
+        
             // Construct the data to be submitted
             const dataToSubmit = {
                 employeeId: id, // Now id is accessible here
@@ -28,12 +28,25 @@ $w.onReady(function () {
                 comments: comments,
                 dateA1: dateA1
             };
-
+        
             try {
-                // Submit the data
-                await wixData.insert('Expected', dataToSubmit);
-                console.log('Form data saved successfully!');
-
+                // Query the Expected table for an existing entry with the same date
+                let existingEntry = await wixData.query('Expected')
+                    .eq('employeeId', id)
+                    .eq('dateA1', dateA1)
+                    .find();
+        
+                if (existingEntry.items.length > 0) {
+                    // If an existing entry is found, update it
+                    dataToSubmit._id = existingEntry.items[0]._id; // Add the _id to the data to be submitted
+                    await wixData.update('Expected', dataToSubmit);
+                    console.log('Form data updated successfully!');
+                } else {
+                    // If no existing entry is found, insert a new entry
+                    await wixData.insert('Expected', dataToSubmit);
+                    console.log('Form data saved successfully!');
+                }
+        
                 // Clear the input fields
                 $item("#timePicker3").value = "";
                 $item("#timePicker4").value = "";
@@ -41,7 +54,7 @@ $w.onReady(function () {
                 $item("#input2").value = "";
                 $item("#textBox1").value = "";
                 $item("#datePicker2").value = "";
-
+        
             } catch (error) {
                 console.error('Error saving form data:', error);
             }
