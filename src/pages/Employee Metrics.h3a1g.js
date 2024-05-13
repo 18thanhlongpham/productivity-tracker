@@ -18,6 +18,20 @@ $w.onReady(function () {
             const comments = $item("#textBox1").value;
             const dateA1 = new Date($item("#datePicker2").value);
         
+            // Validation check
+            if (!expectedLogin || !expectedLogout || isNaN(expectedTasksCompleted) || expectedTasksCompleted === 0 || isNaN(expectedHoursWorked) || expectedHoursWorked === 0 || !comments || !dateA1) {
+                console.error('All fields must be filled out, input1 and input2 must contain only numbers and cannot be 0.');
+                    // Show #group9
+                $item("#group9").show();
+
+                // Hide #group9 after 2 seconds
+                setTimeout(() => {
+                    $item("#group9").hide();
+                }, 1500);
+
+                return;
+            }
+        
             // Construct the data to be submitted
             const dataToSubmit = {
                 employeeId: id, // Now id is accessible here
@@ -46,7 +60,15 @@ $w.onReady(function () {
                     await wixData.insert('Expected', dataToSubmit);
                     console.log('Form data saved successfully!');
                 }
-        
+                
+                // Show #group10
+                $item("#group10").show();
+
+                // Hide #group10 after 1.5 seconds
+                setTimeout(() => {
+                    $item("#group10").hide();
+                }, 1500);
+                
                 // Clear the input fields
                 $item("#timePicker3").value = "";
                 $item("#timePicker4").value = "";
